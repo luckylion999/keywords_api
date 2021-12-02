@@ -17,6 +17,12 @@ class KeywordsAPIView(APIView):
         websites = request.query_params.get('websites')
         blacklist = request.query_params.get('blacklist')
 
+        if not keywords or not websites:
+            return Response(
+                data={"error": "Need to specify keywords and websites"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         result = []
         websites = websites.split(',')
         keywords = keywords.split(',')
