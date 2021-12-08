@@ -34,26 +34,25 @@ class KeywordsAPIView(APIView):
             for page_link in page_links:
                 if len(keywords) == 0:
                     break
-                if 'faltenunterspritzung-mit-hyaluronsaeure-koeln' in page_link:
-                    print(5555555555)
                 try:
                     req = urllib2.Request(
                         page_link, headers={"User-Agent": "Mozilla/5.0"}
                     )
                     response = urllib2.urlopen(req, context=ctx)
-                    content = str(response.read())
+                    content = str(response.read().decode('utf-8'))
                     word_list = ""
                     try:
                         content_html = BeautifulSoup(content, "html.parser")
                     except Exception:
                         continue
                     word_list += clean_html(str(content_html.find_all("p")))
+                    word_list += clean_html(str(content_html.find_all("h1")))
                     response.close()
                 except Exception:
                     continue
 
                 for keyword in keywords:
-                    if keyword in word_list:
+                    if keyword.lower() in word_list.lower():
                         result.append(
                             {
                                 "keyword": keyword,

@@ -76,7 +76,6 @@ def fetch_all_links_from_website(website, blacklist):
                 if href not in page_links:
                     page_links.append(href)
 
-    # page_links = list(set(page_links))
     page_links.insert(0, website)
 
     return page_links
