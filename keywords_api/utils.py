@@ -22,6 +22,15 @@ def check_is_main_page(url):
     return False
 
 
+def clean_html(raw_html):
+    """
+    Get raw html as parameter and returns as cleaned text.
+    """
+    clean_reg = re.compile("<.*?>")
+    clean_text = re.sub(clean_reg, "", raw_html)
+    return clean_text
+
+
 def fetch_all_links_from_website(website, blacklist):
     """
     Find all ahref links from website and return them all as list without duplicates.
@@ -62,9 +71,12 @@ def fetch_all_links_from_website(website, blacklist):
                     continue
                 if check_is_main_page(href):
                     continue
-                page_links.append(href)
+                if href.split('/')[-1].startswith('tel:'):
+                    continue
+                if href not in page_links:
+                    page_links.append(href)
 
-    page_links = list(set(page_links))
+    # page_links = list(set(page_links))
     page_links.insert(0, website)
 
     return page_links
