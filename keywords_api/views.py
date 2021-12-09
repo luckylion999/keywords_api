@@ -49,8 +49,6 @@ class KeywordsAPIView(APIView):
             page_links = fetch_all_links_from_website(website, blacklist)
 
             for page_link in page_links:
-                if 'hyaluronsaeure-hamburg' in page_link:
-                    print(222222)
                 if len(keywords) == 0:
                     break
                 try:
