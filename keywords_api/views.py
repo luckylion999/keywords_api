@@ -1,10 +1,12 @@
 from rest_framework.views import APIView, status
 from rest_framework.response import Response
 import ssl
+import requests
 import urllib.request as urllib2
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
-from .utils import fetch_all_links_from_website, clean_html
+from .utils import fetch_all_links_from_website, clean_html, tag_visible
 
 
 ctx = ssl.create_default_context()
@@ -27,11 +29,28 @@ class KeywordsAPIView(APIView):
         result = []
         websites = websites.split(',')
         origin_keywords = origin_keywords.split(',')
+
+        # for website in websites:
+        #     for keyword in origin_keywords:
+        #         url = f'https://www.google.com/search?q=site:{urlparse(website).netloc} "{keyword}"'
+        #         response = requests.get(url)
+        #         content = str(response.content.decode('utf-8'))
+        #         word_list = ""
+        #         try:
+        #             content_html = BeautifulSoup(content, "html.parser")
+        #             texts = BeautifulSoup.findAll(text=True)
+        #             visible_texts = filter(tag_visible, texts)
+        #             word_list += u" ".join(t.strip() for t in visible_texts)
+        #         except Exception:
+        #             continue
+
         for website in websites:
             keywords = origin_keywords.copy()
             page_links = fetch_all_links_from_website(website, blacklist)
 
             for page_link in page_links:
+                if 'hyaluronsaeure-hamburg' in page_link:
+                    print(222222)
                 if len(keywords) == 0:
                     break
                 try:
@@ -43,10 +62,11 @@ class KeywordsAPIView(APIView):
                     word_list = ""
                     try:
                         content_html = BeautifulSoup(content, "html.parser")
+                        texts = content_html.findAll(text=True)
+                        visible_texts = filter(tag_visible, texts)
+                        word_list += u" ".join(t.strip() for t in visible_texts)
                     except Exception:
                         continue
-                    word_list += clean_html(str(content_html.find_all("p")))
-                    word_list += clean_html(str(content_html.find_all("h1")))
                     response.close()
                 except Exception:
                     continue
@@ -56,7 +76,7 @@ class KeywordsAPIView(APIView):
                         result.append(
                             {
                                 "keyword": keyword,
-                                "main_url": website,
+                                "main_url": urlparse(website).netloc,
                                 "first_found_at": page_link
                             }
                         )

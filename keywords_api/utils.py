@@ -3,6 +3,7 @@ import ssl
 import urllib.request as urllib2
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup as soup, SoupStrainer
+from bs4.element import Comment
 
 
 def remove_last_trail(url):
@@ -79,3 +80,11 @@ def fetch_all_links_from_website(website, blacklist):
     page_links.insert(0, website)
 
     return page_links
+
+
+def tag_visible(element):
+    if element.parent.name in ['style', 'script', 'head', 'title', 'meta', '[document]']:
+        return False
+    if isinstance(element, Comment):
+        return False
+    return True
