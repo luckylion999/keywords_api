@@ -1,10 +1,11 @@
 from rest_framework.views import APIView, status
 from rest_framework.response import Response
 import ssl
+import urllib
 import requests
 import urllib.request as urllib2
 from urllib.parse import urlparse
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 
 from .utils import fetch_all_links_from_website, clean_html, tag_visible
 
@@ -30,20 +31,6 @@ class KeywordsAPIView(APIView):
         websites = websites.split(',')
         origin_keywords = origin_keywords.split(',')
 
-        # for website in websites:
-        #     for keyword in origin_keywords:
-        #         url = f'https://www.google.com/search?q=site:{urlparse(website).netloc} "{keyword}"'
-        #         response = requests.get(url)
-        #         content = str(response.content.decode('utf-8'))
-        #         word_list = ""
-        #         try:
-        #             content_html = BeautifulSoup(content, "html.parser")
-        #             texts = BeautifulSoup.findAll(text=True)
-        #             visible_texts = filter(tag_visible, texts)
-        #             word_list += u" ".join(t.strip() for t in visible_texts)
-        #         except Exception:
-        #             continue
-
         for website in websites:
             keywords = origin_keywords.copy()
             page_links = fetch_all_links_from_website(website, blacklist)
@@ -56,17 +43,17 @@ class KeywordsAPIView(APIView):
                         page_link, headers={"User-Agent": "Mozilla/5.0"}
                     )
                     response = urllib2.urlopen(req, context=ctx)
-                    content = str(response.read().decode('utf-8'))
+                    content = response.read()
                     word_list = ""
                     try:
                         content_html = BeautifulSoup(content, "html.parser")
                         texts = content_html.findAll(text=True)
                         visible_texts = filter(tag_visible, texts)
                         word_list += u" ".join(t.strip() for t in visible_texts)
-                    except Exception:
+                    except Exception as e:
                         continue
                     response.close()
-                except Exception:
+                except Exception as e:
                     continue
 
                 for keyword in keywords:
