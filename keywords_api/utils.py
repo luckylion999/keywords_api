@@ -61,7 +61,10 @@ def fetch_all_links_from_website(website, blacklist):
     page_links = []
     domain = urlparse(website).netloc
 
+    partner_link = ''
+
     for link in soup(content, "html.parser", parse_only=SoupStrainer("a")):
+        partner_link = ''
         if link.has_attr("href"):
             try:
                 href = remove_last_trail(urljoin(website, link["href"]))
@@ -74,10 +77,17 @@ def fetch_all_links_from_website(website, blacklist):
                     continue
                 if href.split('/')[-1].startswith('tel:'):
                     continue
+                if not href.startswith('http'):
+                    continue
                 if href not in page_links:
-                    page_links.append(href)
+                    if '/partner' in href:
+                        partner_link = href
+                    else:
+                        page_links.append(href)
 
     page_links.insert(0, website)
+    if partner_link:
+        page_links.insert(1, partner_link)
 
     return page_links
 
