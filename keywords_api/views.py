@@ -32,7 +32,14 @@ class KeywordsAPIView(APIView):
         origin_keywords = origin_keywords.split(',')
 
         for website in websites:
-            domain = urlparse(website).netloc.replace("www.", "")
+            if website.startswith('http'):
+                domain = urlparse(website).netloc
+            else:
+                domain = website
+            domain = domain.replace("www.", "")
+            if domain.endswith('/'):
+                domain = domain[:-1]
+
             keywords = origin_keywords.copy()
             for keyword in keywords:
                 if len(keywords) == 0:
@@ -56,7 +63,7 @@ class KeywordsAPIView(APIView):
                                 result.append(
                                     {
                                         "keyword": keyword,
-                                        "main_url": urlparse(website).netloc,
+                                        "main_url": domain,
                                         "first_found_at": link
                                     }
                                 )
