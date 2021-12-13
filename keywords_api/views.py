@@ -44,8 +44,6 @@ class KeywordsAPIView(APIView):
 
             keywords = origin_keywords.copy()
             for keyword in keywords:
-                if len(keywords) == 0:
-                    break
                 text = f'site:{domain} "{keyword}"'
                 text = urllib.parse.quote_plus(text)
                 search_url = 'https://google.com/search?q=' + text
@@ -69,7 +67,6 @@ class KeywordsAPIView(APIView):
                                         "first_found_at": link
                                     }
                                 )
-                                keywords.remove(keyword)
                                 break
 
                 except Exception as e:
