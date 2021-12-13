@@ -30,6 +30,7 @@ class KeywordsAPIView(APIView):
         result = []
         websites = websites.split(',')
         origin_keywords = origin_keywords.split(',')
+        blacklist = blacklist.split(',')
 
         for website in websites:
             if website.startswith('http'):
