@@ -92,6 +92,8 @@ class KeywordsAPIView(APIView):
             page_links.insert(0, website)
 
             for page_link in page_links:
+                if blacklist and any(keyword in page_link for keyword in blacklist):
+                    continue
                 if len(keywords) == 0:
                     break
                 try:
