@@ -75,14 +75,16 @@ class KeywordsAPIView(APIView):
 
         for website in websites:
             keywords = origin_keywords.copy()
-            page_links = fetch_all_links_from_website(website, blacklist)
             if website.startswith('http'):
                 domain = urlparse(website).netloc
             else:
                 domain = website
+                website = f'http://{website}'
             domain = domain.replace("www.", "")
             if domain.endswith('/'):
                 domain = domain[:-1]
+
+            page_links = fetch_all_links_from_website(website, blacklist)
 
             for page_link in page_links:
                 if len(keywords) == 0:
