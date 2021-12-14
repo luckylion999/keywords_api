@@ -6,6 +6,7 @@ import requests
 import urllib.request as urllib2
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup, SoupStrainer
+from usp.tree import sitemap_tree_for_homepage
 
 from .utils import fetch_all_links_from_website, clean_html, tag_visible
 
@@ -84,7 +85,11 @@ class KeywordsAPIView(APIView):
             if domain.endswith('/'):
                 domain = domain[:-1]
 
-            page_links = fetch_all_links_from_website(website, blacklist)
+            # page_links = fetch_all_links_from_website(website, blacklist)
+            tree = sitemap_tree_for_homepage(website)
+            page_links = [link.url for link in tree.all_pages()]
+            page_links = list(set(page_links))
+            page_links.insert(0, website)
 
             for page_link in page_links:
                 if len(keywords) == 0:
