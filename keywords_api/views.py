@@ -108,7 +108,10 @@ class KeywordsAPIView(APIView):
                     )
                     response = urllib2.urlopen(req, context=ctx)
                     content = response.read()
-                    content = content.decode().replace('­', '')
+                    try:
+                        content = content.decode().replace('­', '')
+                    except:
+                        pass
                     word_list = ""
                     try:
                         content_html = BeautifulSoup(content, "html.parser")
