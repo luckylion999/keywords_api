@@ -73,7 +73,11 @@ class KeywordsAPIView(APIView):
         #         except Exception as e:
         #             continue
 
-
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/67.0.3396.99 Safari/537.36',
+            'Content-Type': 'text/html; charset=utf-8',
+        }
         for website in websites:
             keywords = origin_keywords.copy()
             if website.startswith('http'):
@@ -85,11 +89,13 @@ class KeywordsAPIView(APIView):
             if domain.endswith('/'):
                 domain = domain[:-1]
 
-            # page_links = fetch_all_links_from_website(website, blacklist)
             tree = sitemap_tree_for_homepage(website)
             page_links = [link.url for link in tree.all_pages()]
             page_links = list(set(page_links))
             page_links.insert(0, website)
+
+            if len(page_links) <= 1:
+                page_links = fetch_all_links_from_website(website, blacklist)
 
             for page_link in page_links:
                 if blacklist and any(keyword in page_link for keyword in blacklist):
@@ -98,10 +104,11 @@ class KeywordsAPIView(APIView):
                     break
                 try:
                     req = urllib2.Request(
-                        page_link, headers={"User-Agent": "Mozilla/5.0"}
+                        page_link, headers=headers
                     )
                     response = urllib2.urlopen(req, context=ctx)
                     content = response.read()
+                    content = content.decode().replace('­', '')
                     word_list = ""
                     try:
                         content_html = BeautifulSoup(content, "html.parser")
