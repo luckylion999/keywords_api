@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup, SoupStrainer
 from usp.tree import sitemap_tree_for_homepage
 
-from .utils import fetch_all_links_from_website, clean_html, tag_visible
+from .utils import fetch_all_links_from_website, tag_visible, get_ig_data
 
 
 ctx = ssl.create_default_context()
@@ -134,5 +134,23 @@ class KeywordsAPIView(APIView):
                             }
                         )
                         keywords.remove(keyword)
+
+        return Response(data=result, status=status.HTTP_200_OK)
+
+
+class IGDataAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        ig_list = request.query_params.get('ig_list')
+
+        if not ig_list:
+            return Response(
+                data={"error": "Need to specify IG urls"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        ig_list = ig_list.split(',')
+        result = []
+        for ig_url in ig_list:
+            result.append(get_ig_data([ig_url]))
 
         return Response(data=result, status=status.HTTP_200_OK)

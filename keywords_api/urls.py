@@ -16,9 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from .views import KeywordsAPIView
+from .views import KeywordsAPIView, IGDataAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/find_keywords/', KeywordsAPIView.as_view()),
+    path('api/ig-data/', IGDataAPIView.as_view()),
 ]

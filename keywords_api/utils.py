@@ -1,5 +1,6 @@
 import re
 import ssl
+import instaloader
 import urllib.request as urllib2
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup as soup, SoupStrainer
@@ -98,3 +99,91 @@ def tag_visible(element):
     if isinstance(element, Comment):
         return False
     return True
+
+
+def get_most_frequent(array):
+    """
+    Get the most duplicated element from array and return.
+    """
+    array = [
+        item.strip() for item in ", ".join(array).split(",") if item.strip() != ""
+    ]
+    try:
+        result = max(set(array), key=array.count)
+    except Exception:
+        result = ""
+
+    return result
+
+
+IgLoadoader = instaloader.Instaloader()
+IgLoadoader.login("jose.prtlopez", "hero1113")
+
+
+def get_ig_data(doctor_list):
+    """
+    Get detailed Instagram information using instaloader library
+     and return as Dictionary.
+    """
+    ig_biography = ""
+    ig_website = ""
+    hashtags_list = []
+    likes_and_comments_counts = []
+    followers = []
+    followees = []
+
+    for doctor in doctor_list:
+        try:
+            doctor = doctor.split("/")[3]
+        except Exception:
+            continue
+
+        try:
+            profile = instaloader.Profile.from_username(
+                IgLoadoader.context, doctor
+            )
+        except Exception:
+            continue
+
+        if not ig_biography:
+            ig_biography = profile.biography
+        if not ig_website:
+            ig_website = profile.external_url
+
+        followers.append(int(profile.followers))
+        followees.append(int(profile.followees))
+
+        posts = profile.get_posts()
+        for post in posts:
+            likes_and_comments_counts.append((post.likes, post.comments))
+            hashtags_list.append(", ".join(post.caption_hashtags))
+
+    if len(likes_and_comments_counts) > 0:
+        avg_number_likes = sum([iter[0] for iter in likes_and_comments_counts]) / len(
+            likes_and_comments_counts
+        )
+        avg_number_comments = sum(
+            [iter[1] for iter in likes_and_comments_counts]
+        ) / len(likes_and_comments_counts)
+    else:
+        avg_number_likes = 0
+        avg_number_comments = 0
+
+    unique_hashtags_list = list(
+        set([h.strip() for h in ", ".join(hashtags_list).split(",")])
+    )
+
+    data_ig = {
+        "IG_BIOGRAPHY": ig_biography,
+        "IG_BIOGRAPHY_WEBSITE": ig_website,
+        "IG_FOLLOWERS": sum(followers),
+        "IG_FOLLOWS": sum(followees),
+        "IG_POSTS": len(likes_and_comments_counts),
+        "IG_HASHTAGS": ", ".join(list(filter(None, unique_hashtags_list))),
+        "IG_MOST_USED_HASHTAG": get_most_frequent(hashtags_list),
+        "IG_AVG_LIKES": int(avg_number_likes),
+        "IG_AVG_COMMENTS": int(avg_number_comments),
+        "IG_URL": doctor_list[0],
+    }
+
+    return data_ig
