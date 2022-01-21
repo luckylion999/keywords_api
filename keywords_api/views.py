@@ -4,11 +4,19 @@ import ssl
 import urllib
 import requests
 import urllib.request as urllib2
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup, SoupStrainer
 from usp.tree import sitemap_tree_for_homepage
+from html_to_etree import parse_html_bytes
+from scrapy.http import HtmlResponse
 
-from .utils import fetch_all_links_from_website, tag_visible, get_ig_data
+from .utils import (
+    fetch_all_links_from_website,
+    tag_visible,
+    get_ig_data,
+    find_links_tree,
+    get_social_link
+)
 
 
 ctx = ssl.create_default_context()
@@ -152,5 +160,118 @@ class IGDataAPIView(APIView):
         result = []
         for ig_url in ig_list:
             result.append(get_ig_data([ig_url]))
+
+        return Response(data=result, status=status.HTTP_200_OK)
+
+
+class FetchIgYtAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        websites = request.query_params.get('websites')
+
+        if not websites:
+            return Response(
+                data={"error": "Need to specify websites"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        websites = websites.split(',')
+        result = []
+        for website in websites:
+            try:
+                res = requests.get(website, verify=False)
+            except:
+                result.append(
+                    {
+                        'website': website,
+                        'ig_accounts': None,
+                        'yt_accounts': None
+                    }
+                )
+                continue
+
+            try:
+                tree = parse_html_bytes(res.content, res.headers.get("content-type"))
+                social_data = list(set(find_links_tree(tree)))
+                ig_accounts = get_social_link(social_data, "instagram.com")
+                yt_accounts = get_social_link(social_data, "youtube.com")
+            except Exception:
+                ig_accounts = None
+                yt_accounts = None
+
+            result.append(
+                {
+                    'website': website,
+                    'ig_accounts': ig_accounts,
+                    'yt_accounts': yt_accounts
+                }
+            )
+
+        return Response(data=result, status=status.HTTP_200_OK)
+
+
+class LogoAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                          'AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/75.0.3770.100 Safari/537.36'
+        }
+
+        websites = request.query_params.get('websites')
+
+        if not websites:
+            return Response(
+                data={"error": "Need to specify websites"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        websites = websites.split(',')
+        result = []
+
+        for website in websites:
+            try:
+                if not website.startswith('http'):
+                    website = f'http://{website}'
+                response = requests.get(website, headers=headers, verify=False)
+                try:
+                    response = HtmlResponse(url=response.url, body=response.text, encoding='utf-8')
+                    logo = response.xpath('//img[contains(@src, "logo")]/@src').extract_first()
+                    if not logo:
+                        logo = response.xpath('//img[contains(@data-orig-src, "logo")]/@src').extract_first()
+                    if not logo:
+                        logo = response.xpath('//img[contains(@data-src, "logo")]/@src').extract_first()
+                    if not logo:
+                        logo = response.xpath('//img[contains(@class, "logo")]/@src').extract_first()
+                    if not logo:
+                        logo = response.xpath('//*[contains(@class, "logo")]//img/@src').extract_first()
+                    if not logo:
+                        logo = response.xpath('//*[contains(@id, "logo")]//img/@src').extract_first()
+                    if not logo:
+                        logo = response.xpath('//*[contains(@class, "navbar-brand")]//img/@src').extract_first()
+
+                    result.append(
+                        {
+                            'website': website,
+                            'logo': urljoin(response.url, logo) if logo else ''
+                        }
+                    )
+
+                except Exception as e:
+                    result.append(
+                        {
+                            'website': website,
+                            'logo': ''
+                        }
+                    )
+                    continue
+
+            except Exception as e:
+                result.append(
+                    {
+                        'website': website,
+                        'logo': ''
+                    }
+                )
+                continue
 
         return Response(data=result, status=status.HTTP_200_OK)
