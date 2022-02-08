@@ -164,7 +164,7 @@ class IGDataAPIView(APIView):
         return Response(data=result, status=status.HTTP_200_OK)
 
 
-class FetchIgYtAPIView(APIView):
+class FetchSocialAccountsAPIView(APIView):
     def get(self, request, *args, **kwargs):
         websites = request.query_params.get('websites')
 
@@ -183,8 +183,13 @@ class FetchIgYtAPIView(APIView):
                 result.append(
                     {
                         'website': website,
-                        'ig_accounts': None,
-                        'yt_accounts': None
+                        'instagram_accounts': None,
+                        'youtube_accounts': None,
+                        'linkedin_accounts': None,
+                        'twitter_accounts': None,
+                        'facebook_accounts': None,
+                        'pinterest_accounts': None,
+                        'tiktok_accounts': None,
                     }
                 )
                 continue
@@ -192,17 +197,32 @@ class FetchIgYtAPIView(APIView):
             try:
                 tree = parse_html_bytes(res.content, res.headers.get("content-type"))
                 social_data = list(set(find_links_tree(tree)))
-                ig_accounts = get_social_link(social_data, "instagram.com")
-                yt_accounts = get_social_link(social_data, "youtube.com")
+                instagram_accounts = get_social_link(social_data, "instagram.com")
+                youtube_accounts = get_social_link(social_data, "youtube.com")
+                linkedin_accounts = get_social_link(social_data, "linkedin.com")
+                twitter_accounts = get_social_link(social_data, "twitter.com")
+                facebook_accounts = get_social_link(social_data, "facebook.com")
+                pinterest_accounts = get_social_link(social_data, "pinterest.com")
+                tiktok_accounts = get_social_link(social_data, "tiktok.com")
             except Exception:
-                ig_accounts = None
-                yt_accounts = None
+                instagram_accounts = None
+                youtube_accounts = None
+                linkedin_accounts = None
+                twitter_accounts = None
+                facebook_accounts = None
+                pinterest_accounts = None
+                tiktok_accounts = None
 
             result.append(
                 {
                     'website': website,
-                    'ig_accounts': ig_accounts,
-                    'yt_accounts': yt_accounts
+                    'instagram_accounts': instagram_accounts,
+                    'youtube_accounts': youtube_accounts,
+                    'linkedin_accounts': linkedin_accounts,
+                    'twitter_accounts': twitter_accounts,
+                    'facebook_accounts': facebook_accounts,
+                    'pinterest_accounts': pinterest_accounts,
+                    'tiktok_accounts': tiktok_accounts
                 }
             )
 
