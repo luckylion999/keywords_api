@@ -177,6 +177,8 @@ class FetchSocialAccountsAPIView(APIView):
         websites = websites.split(',')
         result = []
         for website in websites:
+            if not website.startswith('http'):
+                website = f'http://{website}'
             try:
                 res = requests.get(website, verify=False)
             except:
