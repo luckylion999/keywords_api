@@ -297,3 +297,48 @@ class LogoAPIView(APIView):
                 continue
 
         return Response(data=result, status=status.HTTP_200_OK)
+
+
+class GTMGAFBAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                          'AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/75.0.3770.100 Safari/537.36'
+        }
+
+        websites = request.query_params.get('websites')
+
+        if not websites:
+            return Response(
+                data={"error": "Need to specify websites"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        websites = websites.split(',')
+        result = []
+
+        for website in websites:
+            data = {
+                'Website': website,
+                'GOOGLE_TAG_MANAGER': 'NO',
+                'GOOGLE_ANALYTICS': 'NO',
+                'FACEBOOK_PIXELS': 'NO'
+            }
+            try:
+                if not website.startswith('http'):
+                    website = f'http://{website}'
+                response = requests.get(website, headers=headers, verify=False)
+                content = response.text
+                if 'googletagmanager.com' in content:
+                    data['GOOGLE_TAG_MANAGER'] = 'YES'
+                if 'google-analytics.com' in content:
+                    data['GOOGLE_ANALYTICS'] = 'YES'
+                if 'connect.facebook.net' in content:
+                    data['FACEBOOK_PIXELS'] = 'YES'
+            except Exception as e:
+                pass
+
+            result.append(data)
+
+        return Response(data=result, status=status.HTTP_200_OK)

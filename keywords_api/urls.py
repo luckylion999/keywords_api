@@ -16,7 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from .views import KeywordsAPIView, IGDataAPIView, FetchSocialAccountsAPIView, LogoAPIView
+from .views import (
+    KeywordsAPIView,
+    IGDataAPIView,
+    FetchSocialAccountsAPIView,
+    LogoAPIView,
+    GTMGAFBAPIView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +30,5 @@ urlpatterns = [
     path('api/ig-data/', IGDataAPIView.as_view()),
     path('api/social-links/', FetchSocialAccountsAPIView.as_view()),
     path('api/logos/', LogoAPIView.as_view()),
+    path('api/gtm_ga_fb/', GTMGAFBAPIView.as_view()),
 ]
