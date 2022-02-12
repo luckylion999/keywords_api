@@ -22,6 +22,7 @@ from .views import (
     FetchSocialAccountsAPIView,
     LogoAPIView,
     GTMGAFBAPIView,
+    GetResponseCodeSSLAPIVIEW,
 )
 
 urlpatterns = [
@@ -31,4 +32,5 @@ urlpatterns = [
     path('api/social-links/', FetchSocialAccountsAPIView.as_view()),
     path('api/logos/', LogoAPIView.as_view()),
     path('api/gtm_ga_fb/', GTMGAFBAPIView.as_view()),
+    path('api/ssl_code/', GetResponseCodeSSLAPIVIEW.as_view()),
 ]

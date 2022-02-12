@@ -342,3 +342,44 @@ class GTMGAFBAPIView(APIView):
             result.append(data)
 
         return Response(data=result, status=status.HTTP_200_OK)
+
+
+class GetResponseCodeSSLAPIVIEW(APIView):
+    def get(self, request, *args, **kwargs):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                          'AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/75.0.3770.100 Safari/537.36'
+        }
+
+        websites = request.query_params.get('websites')
+        if not websites:
+            return Response(
+                data={"error": "Need to specify websites"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        websites = websites.split(',')
+        result = []
+        for website in websites:
+            data = {
+                'website': website,
+                'response_code': 'ERROR',
+                'ssl': 'ERROR'
+            }
+            if not website.startswith('http'):
+                website = f'http://{website}'
+
+            try:
+                response = requests.get(website, headers=headers)
+                if response.url.startswith('https'):
+                    data['ssl'] = 'YES'
+                else:
+                    data['ssl'] = 'NO'
+                data['response_code'] = response.status_code
+            except:
+                pass
+
+            result.append(data)
+
+        return Response(data=result, status=status.HTTP_200_OK)
