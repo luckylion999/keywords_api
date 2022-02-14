@@ -199,13 +199,13 @@ class FetchSocialAccountsAPIView(APIView):
             try:
                 tree = parse_html_bytes(res.content, res.headers.get("content-type"))
                 social_data = list(set(find_links_tree(tree)))
-                instagram_accounts = get_social_link(social_data, "instagram.com")
-                youtube_accounts = get_social_link(social_data, "youtube.com")
-                linkedin_accounts = get_social_link(social_data, "linkedin.com")
-                twitter_accounts = get_social_link(social_data, "twitter.com")
-                facebook_accounts = get_social_link(social_data, "facebook.com")
-                pinterest_accounts = get_social_link(social_data, "pinterest.com")
-                tiktok_accounts = get_social_link(social_data, "tiktok.com")
+                instagram_accounts = get_social_link(social_data, ["instagram.com"])
+                youtube_accounts = get_social_link(social_data, ["youtube.com"])
+                linkedin_accounts = get_social_link(social_data, ["linkedin.com"])
+                twitter_accounts = get_social_link(social_data, ["twitter.com"])
+                facebook_accounts = get_social_link(social_data, ["facebook.com"])
+                pinterest_accounts = get_social_link(social_data, ["pinterest.com", "pinterest.de"])
+                tiktok_accounts = get_social_link(social_data, ["tiktok.com", "tiktok.de"])
             except Exception:
                 instagram_accounts = None
                 youtube_accounts = None
@@ -364,8 +364,8 @@ class GetResponseCodeSSLAPIVIEW(APIView):
         for website in websites:
             data = {
                 'website': website,
-                'response_code': 'ERROR',
-                'ssl': 'ERROR'
+                'response_code': None,
+                'ssl': 'ERROR',
             }
             if not website.startswith('http'):
                 website = f'http://{website}'
@@ -377,7 +377,8 @@ class GetResponseCodeSSLAPIVIEW(APIView):
                 else:
                     data['ssl'] = 'NO'
                 data['response_code'] = response.status_code
-            except:
+            except Exception as e:
+                data['response_code'] = 500
                 pass
 
             result.append(data)

@@ -19,6 +19,7 @@ SITES = [
     "fb.co",
     r"plus\.google.com/",
     "pinterest.com/",
+    "pinterest.de/",
     "instagram.com/",
     "snapchat.com/",
     "flipboard.com/",
@@ -32,6 +33,8 @@ SITES = [
     "vimeo.com",
     "slideshare.net",
     "vkontakte.ru",
+    "tiktok.com",
+    "tiktok.de",
 ]
 BETWEEN = ["user/", "add/", "pages/", "#!/", "photos/", "u/0/"]
 ACCOUNT = r"[\w\+_@\.\-/%]+"
@@ -281,8 +284,9 @@ def find_links_tree(tree):
             yield script.get("content")
 
 
-def get_social_link(social_list, social_name):
+def get_social_link(social_list, social_names):
     for social in social_list:
-        if social_name in social and "/legal/privacy" not in social:
-            return social
+        for social_name in social_names:
+            if social_name in social and "/legal/privacy" not in social:
+                return social
     return ""
