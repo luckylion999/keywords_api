@@ -13,7 +13,7 @@ from scrapy.http import HtmlResponse
 from .utils import (
     fetch_all_links_from_website,
     tag_visible,
-    get_ig_data,
+    # get_ig_data,
     find_links_tree,
     get_social_link
 )
@@ -158,8 +158,8 @@ class IGDataAPIView(APIView):
 
         ig_list = ig_list.split(',')
         result = []
-        for ig_url in ig_list:
-            result.append(get_ig_data([ig_url]))
+        # for ig_url in ig_list:
+        #     result.append(get_ig_data([ig_url]))
 
         return Response(data=result, status=status.HTTP_200_OK)
 
